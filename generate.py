@@ -6,7 +6,6 @@ import sqlite3
 import json
 import requests
 
-from markdown import markdown
 from cgi import escape
 
 
@@ -113,7 +112,8 @@ class Value(object):
         try: 
             bits =  self.type.split("->")
         except:
-            bits = [] # dict received
+            bits = [] 
+            print "error %s -> docgen: %s"(self.name, self.docgen) # dict received
         
         ret.append(name_link(self.name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>")   
         if self.assocPrec:
@@ -130,13 +130,19 @@ class Module(object):
         self.package = package
         self.name = json["name"]
         self.comment = json['comment']
+        
+        self.docgen = json.get('generated-with-elm-version', "none")
+
         self.aliases = {v.name:v for v in map(Alias, json['aliases'])}
         self.types = {v.name:v for v in map(Type, json['types'])}
         self.values = {v.name:v for v in map(Value, json['values'])}
+        for v in self.values.values():
+            v.docgen = self.docgen
 
     def insert_in_db(self, name, kind):
         file_name = docname(self.package, self.name)
-        cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+name))
+        if not DEBUG:
+            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+name))
     
     def get_markdown(self):
         pre = self.comment.split("#")[0]
@@ -181,7 +187,10 @@ class Module(object):
                     else:
                         ret.append(content)
         except:
-            print "Error in ", self.package, self.name
+
+            print "Error in ", self.package, self.name, self.docgen
+            # import traceback
+            # traceback.print_exc()
 
         return  "\n\n".join(ret)
 
@@ -249,7 +258,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("circuithub/elm-bootstrap-html", "Bootstrap.Html")
+        debug_module("avh4/elm-table", "Table")
     else:
         prepare()
 

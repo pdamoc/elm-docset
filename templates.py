@@ -2,15 +2,17 @@
 import pybars
 from cgi import escape
 
-from markdown import markdown
+import markdown
+import markdown.extensions.fenced_code
 
 import requests
 
 gitHub = "https://github.com/"
 gitHubRaw = "https://raw.githubusercontent.com"
 
+fenced_code = markdown.extensions.fenced_code.makeExtension()
 
-toHtml = lambda text: markdown(text, output_format="html5")
+toHtml = lambda text: markdown.markdown(text, extensions=[fenced_code], output_format="html5")
 
 index = u"""<!DOCTYPE html>
 <html lang="en">
