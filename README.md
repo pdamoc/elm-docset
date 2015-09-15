@@ -1,2 +1,6 @@
 # elm-docset
-Elm Docset generator
+Elm Dash Docset generator
+
+To generate, execute `generate.py`. 
+
+Requirements: `pybars`, `markdown` and `requests`.
