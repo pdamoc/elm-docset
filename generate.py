@@ -152,7 +152,7 @@ class Value(object):
             bits =  self.type.split("->")
         except:
             bits = [] 
-            print "error %s -> docgen: %s"(self.name, self.docgen) # dict received
+            print "error %s -> docgen: %s"%(self.name, self.docgen) # dict received
         
         ret.append(name_link(self.name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>")   
         if self.assocPrec:
@@ -183,14 +183,56 @@ class Module(object):
         if not DEBUG:
             cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+name))
     
+    def expand_docs(self, content):
+        ret = []
+        if len(content.split("@")) == 2:
+            comment, hints = content.split("@")
+            items = [i.strip() for i in hints.split(",")]
+        else:
+            parts = content.split("@")
+            comment = parts[0]
+            hints = ", ".join(parts[1:])
+
+        if comment.strip() : ret.append(comment)
+        
+        items = [i.strip() for i in hints.split(",")]
+        
+        for item in items:
+            if item.startswith("docs"): item = item.split()[1]
+            if item.startswith("("): item = item[1:-1]
+
+            if item in self.values:
+                
+                self.insert_in_db(self.values[item].name, "Function")
+                ret.append(self.values[item].markdown)
+
+            elif item in self.types:
+                
+                self.insert_in_db(self.types[item].name, "Union")
+                ret.append(self.types[item].markdown)
+
+            elif item in self.aliases:
+                
+                self.insert_in_db(self.aliases[item].name, "Type")
+
+                ret.append(self.aliases[item].markdown)
+
+        return "\n\n".join(ret)
+
     def get_markdown(self):
-        pre = self.comment.split("#")[0]
+        pre = self.comment.split("# ")[0]
         body = self.comment[len(pre):]
 
+        if "@" in pre:
+            pre_ = pre.split("@")[0]
+            ret = [pre_]
+            ret.append(self.expand_docs(pre[len(pre_):]))
 
-        ret = [pre]
+        else:
+            ret = [pre]
+
         try:
-            for part in body.split("#"):
+            for part in body.split("# "):
                 if part:
                     title = "# "+ part.splitlines()[0]
                     ret.append(title)       
@@ -198,36 +240,12 @@ class Module(object):
                     content = "\n".join(part.splitlines()[1:])
 
                     if "@" in content:
-                        comment, hints = content.split("@")
-                        
-                        if comment.strip() : ret.append(comment)
-                        
-                        items = [i.strip() for i in hints.split(",")]
-                        
-                        for item in items:
-                            if item.startswith("docs"): item = item.split()[1]
-                            if item.startswith("("): item = item[1:-1]
-
-                            if item in self.values:
-                                
-                                self.insert_in_db(self.values[item].name, "Function")
-                                ret.append(self.values[item].markdown)
-
-                            elif item in self.types:
-                                
-                                self.insert_in_db(self.types[item].name, "Union")
-                                ret.append(self.types[item].markdown)
-
-                            elif item in self.aliases:
-                                
-                                self.insert_in_db(self.aliases[item].name, "Type")
-
-                                ret.append(self.aliases[item].markdown)
+                        ret.append(self.expand_docs(content))
                     else:
                         ret.append(content)
         except:
 
-            print "Error in ", self.package, self.name, self.docgen
+            print "Error in ", self.package, self.name, "dogen is:'%s'"%self.docgen
             
             import traceback
             traceback.print_exc()
@@ -298,7 +316,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("evancz/elm-http", "Http")
+        debug_module("jystic/elm-font-awesome", "FontAwesome")
     else:
         prepare()
 
