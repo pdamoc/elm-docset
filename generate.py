@@ -63,8 +63,24 @@ class Type(object):
      
     def get_markdown(self):
         ret = ['<div style="padding: 0px; margin: 0px; width: 980px; height: 1px; background-color: rgb(216, 221, 225);"></div>']
+        
+        top = '<div class="mono"><br />'
+        
+        top += name_link(self.name, "type")
+        if self.args : 
+            top += " "+" ".join(self.args)
 
-        ret.append(name_link(self.name))        
+        for case in self.cases:
+            name, args = case
+            line = " "+name+" "+" ".join(args)
+            top += "<br />"
+            if self.cases.index(case): 
+                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">|</span>'+line
+            else:
+                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">=</span>'+line
+        top += "</div>"
+        ret.append(top)     
+            
 
         ret.append(self.comment)
         return "\n\n".join(ret)
@@ -81,9 +97,27 @@ class Alias(object):
     
     def get_markdown(self):
         ret = ['<div style="padding: 0px; margin: 0px; width: 980px; height: 1px; background-color: rgb(216, 221, 225);"></div>']
-
-        ret.append(name_link(self.name))        
         
+        top = '<div class="mono"><br />'
+        
+        top += name_link(self.name, "alias")
+        if self.args : 
+            top += " "+" ".join(self.args)
+        
+        top += '<span class="green"> =</span> </div> '
+
+        ret.append(top)     
+
+        type_parts = []
+        parts = self.type.split(",")
+        for part in parts:
+            if parts.index(part) == 0:
+                type_parts.append("    "+part)
+            elif part == parts[-1]:
+                type_parts.append("    "+part[:-1]+"\n    }")
+            else:
+                type_parts.append("    , "+part)
+        ret.append("\n".join(type_parts))
         ret.append(self.comment)
         return "\n\n".join(ret)
 
@@ -92,10 +126,15 @@ class Alias(object):
 
 valid_chars = "_'"+string.digits+string.lowercase+string.uppercase
 
-def name_link(name):
+def name_link(name, type="value"):
     safe_name = escape(name if name[0] in valid_chars else "(%s)"%name)
-    return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="green"> :</span> </strong>'%(name, name, safe_name)
-
+    if type == "value":
+        return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="green"> :</span> </strong>'%(name, name, safe_name)
+    elif type == "type":
+        return '<strong> <span class="green"> type </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, safe_name)
+    else:
+        return '<strong> <span class="green"> type alias </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, safe_name)
+        
 class Value(object):
     def __init__(self, json):
         self.name = json["name"]
@@ -189,8 +228,9 @@ class Module(object):
         except:
 
             print "Error in ", self.package, self.name, self.docgen
-            # import traceback
-            # traceback.print_exc()
+            
+            import traceback
+            traceback.print_exc()
 
         return  "\n\n".join(ret)
 
@@ -251,14 +291,14 @@ def generate_all():
         print "DONE!"
 
 DEBUG = False 
-# DEBUG = True
+DEBUG = True
 
 if __name__ == '__main__':
     print("starting ...")
 
     if DEBUG:
         from debug import debug_module
-        debug_module("avh4/elm-table", "Table")
+        debug_module("evancz/elm-http", "Http")
     else:
         prepare()
 

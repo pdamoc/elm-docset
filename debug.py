@@ -19,7 +19,7 @@ def debug_module(pkg_name, module_name):
 
     # print json_data_dict[module_name]
 
-    with open("debug.html", "w") as fo:  
+    with open("./assetts/debug.html", "w") as fo:  
         data = { "pkg_link": (pkg_name, "#"), "module_name":module.name, "markdown":toHtml(module.markdown)}
         fo.write(moduleTemplate(data))
 
