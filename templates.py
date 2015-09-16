@@ -93,6 +93,7 @@ def moduleslist(this, options, items):
     result = [u'<ul class="modulesList">']
     for (name, link) in items:
         result.append(u'<li>')
+        result.append(u'<a name="//apple_ref/cpp/Module/%s" class="dashAnchor"></a>'%name)
         result.append(u'<a href="%s">%s</a>'%(link, name))
         result.append(u'</li>')
     result.append(u'</ul>')

@@ -188,7 +188,8 @@ class Module(object):
         
         if not DEBUG:
             cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+sname))
-    
+        return '<a name="//apple_ref/cpp/%s/%s" class="dashAnchor"></a>'%(kind, sname)
+
     def expand_docs(self, content):
         ret = []
         if len(content.split("@")) == 2:
@@ -209,19 +210,24 @@ class Module(object):
 
             if item in self.values:
                 
-                self.insert_in_db(self.values[item].name, "Function")
+                da = self.insert_in_db(self.values[item].name, "Function")
+                ret.append(da) #DashAnchor
                 ret.append(self.values[item].markdown)
+                
 
             elif item in self.types:
                 
-                self.insert_in_db(self.types[item].name, "Union")
+                da = self.insert_in_db(self.types[item].name, "Union")
+                ret.append(da) #DashAnchor
                 ret.append(self.types[item].markdown)
+                
 
             elif item in self.aliases:
                 
-                self.insert_in_db(self.aliases[item].name, "Type")
-
+                da = self.insert_in_db(self.aliases[item].name, "Type")
+                ret.append(da) #DashAnchor
                 ret.append(self.aliases[item].markdown)
+               
 
         return "\n\n".join(ret)
 
