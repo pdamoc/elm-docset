@@ -57,6 +57,7 @@ def prepare():
 class Type(object):
     def __init__(self, json):
         self.name = json["name"]
+        self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
         self.cases = json["cases"]
@@ -66,7 +67,7 @@ class Type(object):
         
         top = '<div class="mono"><br />'
         
-        top += name_link(self.name, "type")
+        top += name_link(self.safe_name, "type")
         if self.args : 
             top += " "+" ".join(self.args)
 
@@ -91,6 +92,7 @@ class Type(object):
 class Alias(object):
     def __init__(self, json):
         self.name = json["name"]
+        self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
         self.type = json["type"]
@@ -100,7 +102,7 @@ class Alias(object):
         
         top = '<div class="mono"><br />'
         
-        top += name_link(self.name, "alias")
+        top += name_link(self.safe_name, "alias")
         if self.args : 
             top += " "+" ".join(self.args)
         
@@ -126,18 +128,20 @@ class Alias(object):
 
 valid_chars = "_'"+string.digits+string.lowercase+string.uppercase
 
+safe_name = lambda name: escape(name if name[0] in valid_chars else "(%s)"%name)
+
 def name_link(name, type="value"):
-    safe_name = escape(name if name[0] in valid_chars else "(%s)"%name)
     if type == "value":
-        return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="green"> :</span> </strong>'%(name, name, safe_name)
+        return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="green"> :</span> </strong>'%(name, name, name)
     elif type == "type":
-        return '<strong> <span class="green"> type </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, safe_name)
+        return '<strong> <span class="green"> type </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, name)
     else:
-        return '<strong> <span class="green"> type alias </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, safe_name)
+        return '<strong> <span class="green"> type alias </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, name)
         
 class Value(object):
     def __init__(self, json):
         self.name = json["name"]
+        self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.type = json["type"]
         if "precedence" in json:
@@ -154,10 +158,12 @@ class Value(object):
             bits = [] 
             print "error %s -> docgen: %s"%(self.name, self.docgen) # dict received
         
-        ret.append(name_link(self.name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>")   
+        link = name_link(self.safe_name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>"
+        
         if self.assocPrec:
-            ret.append ("associativity: %s / precedence: %d"%self.assocPrec)
+            link += '<span class="floatright">associativity: <strong>%s</strong> / precedence: <strong>%d</strong> </span>'%self.assocPrec
 
+        ret.append(link)  
         ret.append(self.comment)
 
         return "\n\n".join(ret)
@@ -168,6 +174,7 @@ class Module(object):
     def __init__(self, json, package):
         self.package = package
         self.name = json["name"]
+        self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         
         self.docgen = json.get('generated-with-elm-version', "none")
@@ -180,8 +187,11 @@ class Module(object):
 
     def insert_in_db(self, name, kind):
         file_name = docname(self.package, self.name)
+        sname = safe_name(name)
+        name = name if name[0] in valid_chars else "(%s)"%name
+        
         if not DEBUG:
-            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+name))
+            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+sname))
     
     def expand_docs(self, content):
         ret = []
@@ -316,7 +326,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("jystic/elm-font-awesome", "FontAwesome")
+        debug_module("elm-lang/core", "Basics")
     else:
         prepare()
 

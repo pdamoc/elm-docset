@@ -36,6 +36,7 @@ div.center
   display: block;
   margin-left: auto;
   margin-right: auto;
+  padding: 5px;
 }
 
 table
@@ -83,4 +84,14 @@ span.green {
 
 .mono {
   font-family:monospace;
+}
+
+.floatright {
+  float: right;
+  font-family:monospace;
+  font-size: 12px !important;
+}
+
+.floatright strong {
+  color: #1184CE;
 }
