@@ -10,7 +10,9 @@ from cgi import escape
 
 
 from templates import indexTemplate, pkgTemplate, moduleTemplate, toHtml
+from upgrade_json import upgrade_json
 import string 
+
 
 opj = os.path.join
 
@@ -152,11 +154,7 @@ class Value(object):
     def get_markdown(self):
         ret = ['<div style="padding: 0px; margin: 0px; width: 980px; height: 1px; background-color: rgb(216, 221, 225);"></div>']
         
-        try: 
-            bits =  self.type.split("->")
-        except:
-            bits = [] 
-            print "error %s -> docgen: %s"%(self.name, self.docgen) # dict received
+        bits =  self.type.split("->")
         
         link = name_link(self.safe_name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>"
         
@@ -172,19 +170,17 @@ class Value(object):
 
 class Module(object):
     def __init__(self, json, package):
+        if not json.get('generated-with-elm-version', None):
+            json = upgrade_json(json)
         self.package = package
         self.name = json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         
-        self.docgen = json.get('generated-with-elm-version', "none")
-
         self.aliases = {v.name:v for v in map(Alias, json['aliases'])}
         self.types = {v.name:v for v in map(Type, json['types'])}
         self.values = {v.name:v for v in map(Value, json['values'])}
-        for v in self.values.values():
-            v.docgen = self.docgen
-
+        
     def insert_in_db(self, name, kind):
         file_name = docname(self.package, self.name)
         sname = safe_name(name)
@@ -255,7 +251,7 @@ class Module(object):
                         ret.append(content)
         except:
 
-            print "Error in ", self.package, self.name, "dogen is:'%s'"%self.docgen
+            print "Error in ", self.package, self.name
             
             import traceback
             traceback.print_exc()
@@ -326,7 +322,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("elm-lang/core", "Basics")
+        debug_module("johnpmayer/tagtree", "Data.TagTree")
     else:
         prepare()
 
