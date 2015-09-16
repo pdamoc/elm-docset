@@ -4,7 +4,7 @@ import shutil, os, re
 import sqlite3
 
 import json
-import requests
+from cache import fetch
 
 from cgi import escape
 
@@ -243,10 +243,10 @@ def docname(pkg, module=None):
 def generate_all():
     global pkgs
     print("feching all packages list ..."),
-    all_pkgs = requests.get(pkgsURL+"all-packages").json()
+    all_pkgs = fetch(pkgsURL+"all-packages")
     print("DONE!")
     print("feching new packages list ..."),
-    new_pkgs = requests.get(pkgsURL+"new-packages").json()
+    new_pkgs = fetch(pkgsURL+"new-packages")
     print("DONE!")
 
     new_pkgs = list(set(new_pkgs))
@@ -270,7 +270,7 @@ def generate_all():
         print "Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), 
 
         docURL = pkgsURL+"/".join(["packages", pkg_name, pkg_version, "documentation"])+".json"
-        json = requests.get(docURL).json()
+        json = fetch(docURL)
         # module = Module(json)
         links = []
         for module in json:
@@ -291,7 +291,7 @@ def generate_all():
         print "DONE!"
 
 DEBUG = False 
-DEBUG = True
+# DEBUG = True
 
 if __name__ == '__main__':
     print("starting ...")

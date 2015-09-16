@@ -5,7 +5,7 @@ from cgi import escape
 import markdown
 import markdown.extensions.fenced_code
 
-import requests
+from cache import fetch
 
 gitHub = "https://github.com/"
 gitHubRaw = "https://raw.githubusercontent.com"
@@ -101,7 +101,7 @@ def moduleslist(this, options, items):
 
 
 def gitRM(this, name):
-  readme = requests.get("/".join([gitHub, name, "raw/master", "README.md"])).text
+  readme = fetch("/".join([gitHub, name, "raw/master", "README.md"]), False)
   result = toHtml(readme)
   return result
 
