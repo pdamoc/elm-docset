@@ -303,8 +303,9 @@ def generate_all():
         json = fetch(docURL)
         # module = Module(json)
         links = []
-        for module in json:
-            module = Module(module, pkg_name)
+        for module_json in json:
+            moduleJsonURL = pkgsURL+"/".join(["packages", pkg_name, pkg_version, "docs", module_json["name"].replace(".", "-")])+".json"
+            module = Module(fetch(moduleJsonURL), pkg_name)
             module_file = docname(pkg_name, module.name)
             links.append((module.name, module_file))
             with open(opj(docpath, module_file), "w") as fo:  
