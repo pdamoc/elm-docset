@@ -267,6 +267,7 @@ class Module(object):
     markdown = property(get_markdown)
 
 def docname(pkg, module=None):
+    pkg = pkg.lower()
     module = (module if module else "index")
     return ".".join([pkg.replace("/", "."), module, "html"])
 
