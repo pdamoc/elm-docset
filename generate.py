@@ -57,8 +57,9 @@ def prepare():
     print("DONE!")
 
 class Type(object):
-    def __init__(self, json):
+    def __init__(self, json, mname):
         self.name = json["name"]
+        self.mname = mname
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
@@ -76,6 +77,7 @@ class Type(object):
         for case in self.cases:
             name, args = case
             line = " "+name+" "+" ".join(args)
+            line = fix_type(line, self.mname)
             top += "<br />"
             if self.cases.index(case): 
                 top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">|</span>'+line
@@ -92,8 +94,9 @@ class Type(object):
 
 
 class Alias(object):
-    def __init__(self, json):
+    def __init__(self, json, mname):
         self.name = json["name"]
+        self.mname = mname
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
@@ -113,14 +116,22 @@ class Alias(object):
         ret.append(top)     
 
         type_parts = []
-        parts = self.type.split(",")
-        for part in parts:
-            if parts.index(part) == 0:
-                type_parts.append("    "+part)
-            elif part == parts[-1]:
-                type_parts.append("    "+part[:-1]+"\n    }")
-            else:
-                type_parts.append("    , "+part)
+
+        parts = map(lambda p : fix_type(p, self.mname), self.type.split(","))
+
+        if self.type.strip().startswith("(") or self.type.strip().startswith("List ("):
+            ending =  "\n    )"
+        else : ending =  "\n    }"
+
+        if len(self.type) >40:
+            for part in parts:
+                if parts.index(part) == 0:
+                    type_parts.append("    "+part)
+                elif part == parts[-1]: 
+                    type_parts.append("    , "+part[:-1]+ending)
+                else:
+                    type_parts.append("    , "+part)
+        else : type_parts = ["    "+", ".join(parts)]
         ret.append("\n".join(type_parts))
         ret.append(self.comment)
         return "\n\n".join(ret)
@@ -139,13 +150,31 @@ def name_link(name, type="value"):
         return '<strong> <span class="green"> type </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, name)
     else:
         return '<strong> <span class="green"> type alias </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, name)
-        
+
+def fix_type (type_data, mname):
+    def fix_bit (bit):
+        subp = bit.split(".")[0]
+        ret = bit.replace("%s.%s"%(subp, subp), subp)
+        return ret
+
+    fix_mname = type_data.replace(mname+".", "")
+    fix_after_space = " ".join(map (fix_bit, fix_mname.split()))
+    
+
+    return "(".join(map (fix_bit, fix_after_space.split("(")))
+
+    
+
+
 class Value(object):
-    def __init__(self, json):
+    def __init__(self, json, mname):
         self.name = json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
-        self.type = json["type"]
+
+        
+        self.type = fix_type(json["type"], mname) 
+
         if "precedence" in json:
             self.assocPrec = (json["associativity"], json["precedence"])
         else:
@@ -155,7 +184,7 @@ class Value(object):
         ret = ['<div style="padding: 0px; margin: 0px; width: 980px; height: 1px; background-color: rgb(216, 221, 225);"></div>']
         
         bits =  self.type.split("->")
-        
+
         link = name_link(self.safe_name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>"
         
         if self.assocPrec:
@@ -177,9 +206,9 @@ class Module(object):
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         
-        self.aliases = {v.name:v for v in map(Alias, json['aliases'])}
-        self.types = {v.name:v for v in map(Type, json['types'])}
-        self.values = {v.name:v for v in map(Value, json['values'])}
+        self.aliases = {v.name:v for v in map(lambda a : Alias(a, self.name), json['aliases'])}
+        self.types = {v.name:v for v in map(lambda a : Type(a, self.name), json['types'])}
+        self.values = {v.name:v for v in map(lambda a : Value(a, self.name), json['values'])}
         
     def insert_in_db(self, name, kind):
         file_name = docname(self.package, self.name)

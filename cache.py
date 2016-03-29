@@ -13,7 +13,13 @@ def fetch(url, isJSON=True):
         if isJSON:
             cache[url] = requests.get(url).json()
         else: 
-            cache[url] = requests.get(url).text
+            r = requests.get(url)
+            if r.status_code != requests.codes.ok and url.endswith(".md"):
+                r = requests.get(url.replace("README.md", "readme.md"))
+                if r.status_code != requests.codes.ok:
+                    cache[url] = "--"
+
+            cache[url] = r.text
             
         with open("cache.json", "w") as fo:
             fo.write(json.dumps(cache))
