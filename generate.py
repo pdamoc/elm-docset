@@ -1,5 +1,6 @@
 #!/usr/local/bin/python
 
+from __future__ import print_function
 import shutil, os, re 
 import sqlite3
 
@@ -117,7 +118,7 @@ class Alias(object):
 
         type_parts = []
 
-        parts = map(lambda p : fix_type(p, self.mname), self.type.split(","))
+        parts = list(map(lambda p : fix_type(p, self.mname), self.type.split(",")))
 
         if self.type.strip().startswith("(") or self.type.strip().startswith("List ("):
             ending =  "\n    )"
@@ -139,7 +140,7 @@ class Alias(object):
     markdown = property(get_markdown)
 
 
-valid_chars = "_'"+string.digits+string.lowercase+string.uppercase
+valid_chars = "_'"+string.digits+string.ascii_lowercase+string.ascii_uppercase
 
 safe_name = lambda name: escape(name if name[0] in valid_chars else "(%s)"%name)
 
@@ -286,7 +287,7 @@ class Module(object):
                         ret.append(content)
         except:
 
-            print "Error in ", self.package, self.name
+            print ("Error in ", self.package, self.name)
             
             import traceback
             traceback.print_exc()
@@ -312,13 +313,13 @@ def generate_all():
     new_pkgs = list(set(new_pkgs))
     all_pkgs_dict = {p["name"]:p for p in all_pkgs}
 
-    deprecated = [p for p in all_pkgs_dict.iteritems() if not p in new_pkgs]
+    deprecated = [p for p in all_pkgs_dict.items() if not p in new_pkgs]
 
     pkgs = [p for p in all_pkgs if  p["name"] in new_pkgs]
     pkgs.sort(key=lambda a: a["name"].lower())
     
     # generate the index
-    with open(opj(docpath, "index.html"), "w") as fo:
+    with open(opj(docpath, "index.html"), "wb") as fo:
         fo.write(indexTemplate({"pkgs":[(pkg["name"], docname(pkg["name"]), pkg["summary"]) for pkg in pkgs]}))
 
     no_pkgs = len(pkgs)
@@ -327,7 +328,7 @@ def generate_all():
         pkg_name = pkg["name"]
         pkg_file = docname(pkg_name)
         pkg_version = pkg["versions"][0]
-        print "Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), 
+        print ("Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), end="") 
 
         docURL = pkgsURL+"/".join(["packages", pkg_name, pkg_version, "documentation"])+".json"
         json = fetch(docURL)
@@ -338,18 +339,18 @@ def generate_all():
             module = Module(fetch(moduleJsonURL), pkg_name)
             module_file = docname(pkg_name, module.name)
             links.append((module.name, module_file))
-            with open(opj(docpath, module_file), "w") as fo:  
+            with open(opj(docpath, module_file), "wb") as fo:  
                 html = toHtml(module.markdown).replace('<code>', '<code class="elm">') # fix syntax detection
                 data = { "pkg_link": (pkg_name, pkg_file), "module_name":module.name, "markdown":html}
                 fo.write(moduleTemplate(data))
             cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (module.name, 'Module', module_file))
 
-        with open(opj(docpath, pkg_file), "w") as fo:
+        with open(opj(docpath, pkg_file), "wb") as fo:
             data = { "pkg_name": pkg_name, "modules":links, "version":pkg_version}
             fo.write(pkgTemplate(data))
         cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (pkg_name, 'Package', pkg_file))
 
-        print "DONE!"
+        print ("DONE!")
 
 DEBUG = False 
 # DEBUG = True

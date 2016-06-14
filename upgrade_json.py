@@ -54,7 +54,7 @@ def new_type_info(type):
     if type["tag"] == "lambda":
         return "%s -> %s"%(upgrade_app_args(type["in"]), upgrade_app_args(type["out"], False))
 
-    print "error", type
+    print ("error", type)
     return ""
 
 def upgrade_type_info(value):

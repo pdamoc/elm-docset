@@ -107,8 +107,9 @@ def gitRM(this, name):
   return result
 
 
-def package_helper(this, (name, link)):
-  author, package = name.split("/")
+def package_helper(this, nameLink):
+  (name, link) = nameLink
+  (author, package) = name.split("/")
   return '<span> %s / <a href="%s">%s</a></span>'%(author, link, package)
 
 
