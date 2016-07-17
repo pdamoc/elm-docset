@@ -118,7 +118,7 @@ def pkglist(this, options, items):
     for (name, link, summary) in items:
         result.append(u'<tr>')
         result.append(u'<td class="first"><a href="%s">%s</a></td>'%(link, name))
-        result.append(u'<td>%s</td>'%summary)
+        result.append(u'<td>%s</td>'%escape(summary))
         result.append(u'</tr>')
     result.append(u'</table>')
     return result
