@@ -10,10 +10,12 @@
 	<string>elm</string>
 	<key>isDashDocset</key>
 	<true/>
-    <key>dashIndexFilePath</key>
-    <string>index.html</string>
-    <key>DashDocSetFamily</key>
-    <string>dashtoc</string>
-    <key>isJavaScriptEnabled</key><true/>
+  <key>dashIndexFilePath</key>
+  <string>index.html</string>
+  <key>DashDocSetFamily</key>
+  <string>dashtoc</string>
+  <key>isJavaScriptEnabled</key><true/>
+  <key>DashDocSetPlayURL</key>
+  <string>http://elm-lang.org/try</string>
 </dict>
 </plist>
