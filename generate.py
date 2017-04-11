@@ -57,6 +57,12 @@ def prepare():
 
     print("DONE!")
 
+def fix_missing_parentheses(arg):
+    if " " in arg:
+        return "(%s)"%arg
+    else: 
+        return arg
+
 class Type(object):
     def __init__(self, json, mname):
         self.name = json["name"]
@@ -69,14 +75,14 @@ class Type(object):
     def get_markdown(self):
         ret = ['<div style="padding: 0px; margin: 0px; width: 980px; height: 1px; background-color: rgb(216, 221, 225);"></div>']
         
-        top = '<div class="mono"><br />'
-        
+        top = '<div class="mono"><br />' 
         top += name_link(self.safe_name, "type")
         if self.args : 
             top += " "+" ".join(self.args)
 
         for case in self.cases:
             name, args = case
+            args = [ fix_missing_parentheses(arg) for arg in args]
             line = " "+name+" "+" ".join(args)
             line = fix_type(line, self.mname)
             top += "<br />"
@@ -360,7 +366,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("johnpmayer/tagtree", "Data.TagTree")
+        debug_module("elm-lang/http", "Http")
     else:
         prepare()
 
