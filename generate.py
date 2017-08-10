@@ -241,29 +241,31 @@ class Module(object):
         items = [i.strip() for i in hints.split(",")]
         
         for item in items:
-            if item.startswith("docs"): item = item.split()[1]
-            if item.startswith("("): item = item[1:-1]
+            try:
+                if item.startswith("docs"): item = item.split()[1]
+                if item.startswith("("): item = item[1:-1]
 
-            if item in self.values:
-                
-                da = self.insert_in_db(self.values[item].name, "Function")
-                ret.append(da) #DashAnchor
-                ret.append(self.values[item].markdown)
-                
+                if item in self.values:
+                    
+                    da = self.insert_in_db(self.values[item].name, "Function")
+                    ret.append(da) #DashAnchor
+                    ret.append(self.values[item].markdown)
+                    
 
-            elif item in self.types:
-                
-                da = self.insert_in_db(self.types[item].name, "Union")
-                ret.append(da) #DashAnchor
-                ret.append(self.types[item].markdown)
-                
+                elif item in self.types:
+                    
+                    da = self.insert_in_db(self.types[item].name, "Union")
+                    ret.append(da) #DashAnchor
+                    ret.append(self.types[item].markdown)
+                    
 
-            elif item in self.aliases:
-                
-                da = self.insert_in_db(self.aliases[item].name, "Type")
-                ret.append(da) #DashAnchor
-                ret.append(self.aliases[item].markdown)
-               
+                elif item in self.aliases:
+                    
+                    da = self.insert_in_db(self.aliases[item].name, "Type")
+                    ret.append(da) #DashAnchor
+                    ret.append(self.aliases[item].markdown)
+            except: 
+                pass # if the item is invalid we don't introduce it.                
 
         return "\n\n".join(ret)
 
