@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+# coding=utf-8
 
 from __future__ import print_function
 import shutil, os, re 
@@ -206,15 +207,13 @@ class Value(object):
 
 class Module(object):
     def __init__(self, json, package):
-        if not json.get('generated-with-elm-version', None):
-            json = upgrade_json(json)
         self.package = package
         self.name = json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         
         self.aliases = {v.name:v for v in map(lambda a : Alias(a, self.name), json['aliases'])}
-        self.types = {v.name:v for v in map(lambda a : Type(a, self.name), json['types'])}
+        self.types = {v.name:v for v in map(lambda a : Type(a, self.name), json['unions'])}
         self.values = {v.name:v for v in map(lambda a : Value(a, self.name), json['values'])}
         
     def insert_in_db(self, name, kind):
@@ -312,19 +311,9 @@ def docname(pkg, module=None):
 def generate_all():
     global pkgs
     print("feching all packages list ..."),
-    all_pkgs = fetch(pkgsURL+"all-packages")
-    print("DONE!")
-    print("feching new packages list ..."),
-    new_pkgs = fetch(pkgsURL+"new-packages")
-    print("DONE!")
-
-    new_pkgs = list(set(new_pkgs))
-    all_pkgs_dict = {p["name"]:p for p in all_pkgs}
-
-    deprecated = [p for p in all_pkgs_dict.items() if not p in new_pkgs]
-
-    pkgs = [p for p in all_pkgs if  p["name"] in new_pkgs]
-    pkgs.sort(key=lambda a: a["name"].lower())
+    all_pkgs = fetch(pkgsURL+"search.json")
+    print("DONE!") 
+    pkgs = sorted(all_pkgs, key=lambda a: a["name"].lower())
     
     # generate the index
     with open(opj(docpath, "index.html"), "wb") as fo:
@@ -337,15 +326,14 @@ def generate_all():
         pkg_file = docname(pkg_name)
         pkg_version = pkg["versions"][0]
         print ("Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), end="") 
-
-        docURL = pkgsURL+"/".join(["packages", pkg_name, pkg_version, "documentation"])+".json"
-        json = fetch(docURL)
+ 
+        json = fetch( pkgsURL+"/".join(["packages", pkg_name, pkg_version, "docs"])+".json")
         # module = Module(json)
         links = []
         for module_json in json:
-            moduleJsonURL = pkgsURL+"/".join(["packages", pkg_name, pkg_version, "docs", module_json["name"].replace(".", "-")])+".json"
-            module = Module(fetch(moduleJsonURL), pkg_name)
-            module_file = docname(pkg_name, module.name)
+              
+            module = Module(module_json, pkg_name)
+            module_file = docname(pkg_name, module.name) 
             links.append((module.name, module_file))
             with open(opj(docpath, module_file), "wb") as fo:  
                 html = toHtml(module.markdown).replace('<code>', '<code class="elm">') # fix syntax detection
