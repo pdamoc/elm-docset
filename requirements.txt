@@ -1,4 +1,4 @@
 Markdown == 2.6.6
 pybars3 == 0.9.1
-requests == 2.10.0
+requests == 2.20.0
 pybars == 0.0.4
