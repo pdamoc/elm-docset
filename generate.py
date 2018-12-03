@@ -324,7 +324,11 @@ def generate_all():
         idx = pkgs.index(pkg)+1
         pkg_name = pkg["name"]
         pkg_file = docname(pkg_name)
-        pkg_version = pkg["versions"][0]
+        try:
+            pkg_version = pkg["versions"][-1]
+        except IndexError:
+            print ("No version found, skipping package: %s"%pkg_name)
+            continue
         print ("Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), end="") 
  
         json = fetch( pkgsURL+"/".join(["packages", pkg_name, pkg_version, "docs"])+".json")
