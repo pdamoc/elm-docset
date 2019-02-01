@@ -256,14 +256,14 @@ class Module(object):
 
                 elif item in self.types:
                     
-                    da = self.insert_in_db(self.types[item].qualified_name, self.values[item].name, "Union")
+                    da = self.insert_in_db(self.types[item].qualified_name, self.types[item].name, "Union")
                     ret.append(da) #DashAnchor
                     ret.append(self.types[item].markdown)
                     
 
                 elif item in self.aliases:
                     
-                    da = self.insert_in_db(self.aliases[item].qualified_name, self.values[item].name, "Type")
+                    da = self.insert_in_db(self.aliases[item].qualified_name, self.aliases[item].name, "Type")
                     ret.append(da) #DashAnchor
                     ret.append(self.aliases[item].markdown)
             except: 
@@ -346,7 +346,7 @@ def generate_all():
                 html = toHtml(module.markdown).replace('<code>', '<code class="elm">') # fix syntax detection
                 data = { "pkg_link": (pkg_name, pkg_file), "module_name":module.name, "markdown":html}
                 fo.write(moduleTemplate(data))
-            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (module.name, 'Module', module_file))
+            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (module.name + ' (' + pkg_name + ')', 'Module', module_file))
 
         with open(opj(docpath, pkg_file), "wb") as fo:
             data = { "pkg_name": pkg_name, "modules":links, "version":pkg_version}
