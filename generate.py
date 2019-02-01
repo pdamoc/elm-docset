@@ -68,6 +68,7 @@ class Type(object):
     def __init__(self, json, mname):
         self.name = json["name"]
         self.mname = mname
+        self.qualified_name = mname + "." + json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
@@ -105,6 +106,7 @@ class Alias(object):
     def __init__(self, json, mname):
         self.name = json["name"]
         self.mname = mname
+        self.qualified_name = mname + "." + json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
         self.args = json["args"]
@@ -177,6 +179,7 @@ def fix_type (type_data, mname):
 class Value(object):
     def __init__(self, json, mname):
         self.name = json["name"]
+        self.qualified_name = mname + "." + json["name"]
         self.safe_name = safe_name(self.name)
         self.comment = json['comment']
 
@@ -216,13 +219,13 @@ class Module(object):
         self.types = {v.name:v for v in map(lambda a : Type(a, self.name), json['unions'])}
         self.values = {v.name:v for v in map(lambda a : Value(a, self.name), json['values'])}
         
-    def insert_in_db(self, name, kind):
+    def insert_in_db(self, qualified_name, name, kind):
         file_name = docname(self.package, self.name)
         sname = safe_name(name)
         name = name if name[0] in valid_chars else "(%s)"%name
         
         if not DEBUG:
-            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (name, kind, file_name+"#"+sname))
+            cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (qualified_name, kind, file_name+"#"+sname))
         return '<a name="//apple_ref/cpp/%s/%s" class="dashAnchor"></a>'%(kind, sname)
 
     def expand_docs(self, content):
@@ -246,21 +249,21 @@ class Module(object):
 
                 if item in self.values:
                     
-                    da = self.insert_in_db(self.values[item].name, "Function")
+                    da = self.insert_in_db(self.values[item].qualified_name, self.values[item].name, "Function")
                     ret.append(da) #DashAnchor
                     ret.append(self.values[item].markdown)
                     
 
                 elif item in self.types:
                     
-                    da = self.insert_in_db(self.types[item].name, "Union")
+                    da = self.insert_in_db(self.types[item].qualified_name, self.values[item].name, "Union")
                     ret.append(da) #DashAnchor
                     ret.append(self.types[item].markdown)
                     
 
                 elif item in self.aliases:
                     
-                    da = self.insert_in_db(self.aliases[item].name, "Type")
+                    da = self.insert_in_db(self.aliases[item].qualified_name, self.values[item].name, "Type")
                     ret.append(da) #DashAnchor
                     ret.append(self.aliases[item].markdown)
             except: 
