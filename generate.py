@@ -218,6 +218,7 @@ class Module(object):
         self.aliases = {v.name:v for v in map(lambda a : Alias(a, self.name), json['aliases'])}
         self.types = {v.name:v for v in map(lambda a : Type(a, self.name), json['unions'])}
         self.values = {v.name:v for v in map(lambda a : Value(a, self.name), json['values'])}
+        self.operators = {v.name:v for v in map(lambda a : Value(a, self.name), json['binops'])}
         
     def insert_in_db(self, qualified_name, name, kind):
         file_name = docname(self.package, self.name)
@@ -252,7 +253,12 @@ class Module(object):
                     da = self.insert_in_db(self.values[item].qualified_name, self.values[item].name, "Function")
                     ret.append(da) #DashAnchor
                     ret.append(self.values[item].markdown)
+
+                elif item in self.operators:
                     
+                    da = self.insert_in_db(self.operators[item].qualified_name, self.operators[item].name, "Operator")
+                    ret.append(da) #DashAnchor
+                    ret.append(self.operators[item].markdown)
 
                 elif item in self.types:
                     
