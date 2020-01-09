@@ -7,3 +7,4 @@ cache.json
 # Python
 
 __pycache__
+*.pyc
