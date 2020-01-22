@@ -14,6 +14,7 @@ from cgi import escape
 from templates import indexTemplate, pkgTemplate, moduleTemplate, toHtml
 from upgrade_json import upgrade_json
 import string 
+import pdb
 
 
 opj = os.path.join
@@ -231,51 +232,47 @@ class Module(object):
 
     def expand_docs(self, content):
         ret = []
-        if len(content.split("@")) == 2:
-            comment, hints = content.split("@")
-            items = [i.strip() for i in hints.split(",")]
-        else:
-            parts = content.split("@")
-            comment = parts[0]
-            hints = ", ".join(parts[1:])
 
-        if comment.strip() : ret.append(comment)
-        
-        items = [i.strip() for i in hints.split(",")]
-        
-        for item in items:
+        lines = content.split("\n");
+
+        for line in lines:
             try:
-                if item.startswith("docs"): item = item.split()[1]
-                if item.startswith("("): item = item[1:-1]
+                if line.startswith("@("): pdb.set_trace()
+                if line.startswith("@docs"): 
+                    items = line.split("@docs ")[1].split(", ")
+                    for item in items:
+                        item = item.strip()
+                        if item in self.values:
+                            
+                            da = self.insert_in_db(self.values[item].qualified_name, self.values[item].name, "Function")
+                            ret.append(da) #DashAnchor
+                            ret.append(self.values[item].markdown)
 
-                if item in self.values:
-                    
-                    da = self.insert_in_db(self.values[item].qualified_name, self.values[item].name, "Function")
-                    ret.append(da) #DashAnchor
-                    ret.append(self.values[item].markdown)
+                        elif item in self.operators:
+                            
+                            da = self.insert_in_db(self.operators[item].qualified_name, self.operators[item].name, "Operator")
+                            ret.append(da) #DashAnchor
+                            ret.append(self.operators[item].markdown)
 
-                elif item in self.operators:
-                    
-                    da = self.insert_in_db(self.operators[item].qualified_name, self.operators[item].name, "Operator")
-                    ret.append(da) #DashAnchor
-                    ret.append(self.operators[item].markdown)
+                        elif item in self.types:
+                            
+                            da = self.insert_in_db(self.types[item].qualified_name, self.types[item].name, "Union")
+                            ret.append(da) #DashAnchor
+                            ret.append(self.types[item].markdown)
+                            
 
-                elif item in self.types:
-                    
-                    da = self.insert_in_db(self.types[item].qualified_name, self.types[item].name, "Union")
-                    ret.append(da) #DashAnchor
-                    ret.append(self.types[item].markdown)
-                    
+                        elif item in self.aliases:
+                            
+                            da = self.insert_in_db(self.aliases[item].qualified_name, self.aliases[item].name, "Type")
+                            ret.append(da) #DashAnchor
+                            ret.append(self.aliases[item].markdown)
+                else:
+                    ret.append(line)
 
-                elif item in self.aliases:
-                    
-                    da = self.insert_in_db(self.aliases[item].qualified_name, self.aliases[item].name, "Type")
-                    ret.append(da) #DashAnchor
-                    ret.append(self.aliases[item].markdown)
             except: 
                 pass # if the item is invalid we don't introduce it.                
 
-        return "\n\n".join(ret)
+        return "\n".join(ret)
 
     def get_markdown(self):
         pre = self.comment.split("# ")[0]
@@ -369,7 +366,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("elm-lang/http", "Http")
+        debug_module("mdgriffith/elm-ui", "Element")
     else:
         prepare()
 
