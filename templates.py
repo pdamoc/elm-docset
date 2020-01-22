@@ -1,6 +1,6 @@
 
 import pybars
-from cgi import escape
+from html import escape
 
 import markdown
 import markdown.extensions.fenced_code
