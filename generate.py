@@ -241,7 +241,7 @@ class Module(object):
 
         if comment.strip() : ret.append(comment)
         
-        items = [i.strip().splitlines()[0] for i in hints.split(",")]
+        items = [i.splitlines()[0].strip() for i in hints.split(",") if i != ""]
         
         for item in items:
             try:
@@ -369,7 +369,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("mdgriffith/elm-ui", "Element")
+        debug_module("pdamoc/elm-hashids", "Hashids")
     else:
         prepare()
 
