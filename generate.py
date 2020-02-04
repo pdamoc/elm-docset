@@ -45,7 +45,7 @@ def prepare():
         ("highlight.pack.js", "./Elm.docset/Contents/Resources/Documents/"),
         ]
     for (fn, dest) in files:
-        shutil.copyfile("./assetts/"+fn, dest+fn)
+        shutil.copyfile("./assets/"+fn, dest+fn)
     
 
     db = sqlite3.connect(opj(resPath, 'docSet.dsidx'))
