@@ -76,10 +76,16 @@ display: block;
     padding: 0; 
 }
 
-span.green {
-  color:rgb(127, 209, 59);
+span.grey {
+  color:rgb(127, 127, 127);
   font-weight:bold;
   font-family:monospace;
+}
+
+span.green {
+  color: #859900;
+  font-weight: normal;
+  font-family: monospace;
 }
 
 .mono {
