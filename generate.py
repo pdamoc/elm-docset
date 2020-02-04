@@ -8,7 +8,7 @@ import sqlite3
 import json
 from cache import fetch
 
-from cgi import escape
+from html import escape
 
 
 from templates import indexTemplate, pkgTemplate, moduleTemplate, toHtml
@@ -241,7 +241,7 @@ class Module(object):
 
         if comment.strip() : ret.append(comment)
         
-        items = [i.strip() for i in hints.split(",")]
+        items = [i.splitlines()[0].strip() for i in hints.split(",") if i != ""]
         
         for item in items:
             try:
@@ -369,7 +369,7 @@ if __name__ == '__main__':
 
     if DEBUG:
         from debug import debug_module
-        debug_module("elm/http", "Http")
+        debug_module("pdamoc/elm-hashids", "Hashids")
     else:
         prepare()
 
