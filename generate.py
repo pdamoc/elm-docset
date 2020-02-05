@@ -41,11 +41,11 @@ def prepare():
         ("icon.png", "./Elm.docset/"),
         ("Info.plist", "./Elm.docset/Contents/"),
         ("style.css", "./Elm.docset/Contents/Resources/Documents/"),
-        ("github.css", "./Elm.docset/Contents/Resources/Documents/"),
+        ("packages.css", "./Elm.docset/Contents/Resources/Documents/"),
         ("highlight.pack.js", "./Elm.docset/Contents/Resources/Documents/"),
         ]
     for (fn, dest) in files:
-        shutil.copyfile("./assetts/"+fn, dest+fn)
+        shutil.copyfile("./assets/"+fn, dest+fn)
     
 
     db = sqlite3.connect(opj(resPath, 'docSet.dsidx'))
@@ -89,9 +89,9 @@ class Type(object):
             line = fix_type(line, self.mname)
             top += "<br />"
             if self.cases.index(case): 
-                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">|</span>'+line
+                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="grey">|</span>&nbsp;'+line
             else:
-                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="green">=</span>'+line
+                top += '&nbsp;&nbsp;&nbsp;&nbsp;<span class="grey">=</span>&nbsp;'+line
         top += "</div>"
         ret.append(top)     
             
@@ -121,7 +121,7 @@ class Alias(object):
         if self.args : 
             top += " "+" ".join(self.args)
         
-        top += '<span class="green"> =</span> </div> '
+        top += '<span class="grey"> =</span> </div> '
 
         ret.append(top)     
 
@@ -155,7 +155,7 @@ safe_name = lambda name: escape(name if name[0] in valid_chars else "(%s)"%name)
 
 def name_link(name, type="value"):
     if type == "value":
-        return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="green"> :</span> </strong>'%(name, name, name)
+        return '<strong> <a class="mono" name="%s" href="#%s">%s</a> <span class="grey"> :</span> </strong>'%(name, name, name)
     elif type == "type":
         return '<strong> <span class="green"> type </span><a class="mono" name="%s" href="#%s">%s</a></strong>'%(name, name, name)
     else:
@@ -196,7 +196,7 @@ class Value(object):
         
         bits =  self.type.split("->")
 
-        link = name_link(self.safe_name)+'<span class="mono">'+'<span class="green">-&gt;</span>'.join(bits)+"</span>"
+        link = name_link(self.safe_name)+'<span class="mono">'+'<span class="grey">-&gt;</span>'.join(bits)+"</span>"
         
         if self.assocPrec:
             link += '<span class="floatright">associativity: <strong>%s</strong> / precedence: <strong>%d</strong> </span>'%self.assocPrec

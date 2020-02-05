@@ -22,7 +22,7 @@ def debug_module(pkg_name, module_name):
 
     # print( json_data_dict[module_name])
 
-    with open("./assetts/debug.html", "wb") as fo:  
-        data = { "pkg_link": (pkg_name, "#"), "module_name":module.name, "markdown":toHtml(module.markdown)}
+    with open("./assets/debug.html", "wb") as fo:  
+        data = { "pkg_link": (pkg_name, "#"), "module_name":module.name, "markdown":toHtml(module.markdown).replace('<code>', '<code class="elm">')}
         fo.write(moduleTemplate(data))
 

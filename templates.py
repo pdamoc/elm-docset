@@ -20,7 +20,7 @@ index = u"""<!DOCTYPE html>
     <meta charset="utf-8">
     
     <link href="style.css" media="all" rel="stylesheet">
-    <link rel="stylesheet" href="github.css">
+    <link rel="stylesheet" href="packages.css">
     <script src="highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
 
@@ -43,7 +43,7 @@ package = u"""<!DOCTYPE html>
     <meta charset="utf-8">
     <link href="style.css" media="all" rel="stylesheet">
     
-    <link rel="stylesheet" href="github.css">
+    <link rel="stylesheet" href="packages.css">
     <script src="highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     
@@ -71,7 +71,7 @@ module = u"""<!DOCTYPE html>
     <meta charset="utf-8">
     <link href="style.css" media="all" rel="stylesheet">
     
-    <link rel="stylesheet" href="github.css">
+    <link rel="stylesheet" href="packages.css">
     <script src="highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     
