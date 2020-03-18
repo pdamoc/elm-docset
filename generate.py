@@ -334,8 +334,8 @@ def generate_all():
         pkg_name = pkg["name"]
         pkg_file = docname(pkg_name)
         try:
-            pkg_version = pkg["versions"][-1]
-        except IndexError:
+            pkg_version = pkg["version"]
+        except KeyError:
             print ("No version found, skipping package: %s"%pkg_name)
             continue
         print ("Generating package: "+pkg_name+" [% 3d / %03d]..."%(idx, no_pkgs), end="") 
