@@ -4,6 +4,8 @@
 from __future__ import print_function
 import shutil, os, re 
 import sqlite3
+import urllib.parse
+import functools
 
 import json
 from cache import fetch
@@ -227,7 +229,14 @@ class Module(object):
         
         if not DEBUG:
             cur.execute('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', (qualified_name, kind, file_name+"#"+sname))
-        return '<a name="//apple_ref/cpp/%s/%s" class="dashAnchor"></a>'%(kind, sname)
+
+        # Return a HTML Anchor to be used for Table-of-Contents (the sidebar) support.
+        # REF: https://kapeli.com/docsets#tableofcontents
+        percent_encode_path_component = functools.partial(urllib.parse.quote, safe='')
+        return '<a name="//apple_ref/cpp/%s/%s" class="dashAnchor"></a>' % (
+            percent_encode_path_component(kind),
+            percent_encode_path_component(sname),
+        )
 
     def expand_docs(self, content):
         ret = []
